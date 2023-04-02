@@ -12,7 +12,8 @@ import Notiflix, { Notify } from 'notiflix';
 // views - кількість переглядів.
 // comments - кількість коментарів.
 // downloads - кількість завантажень.
-const totalNumberPicturesOfPage = 10;
+const BASE_URL = 'https://pixabay.com/api/?key=34821282-c80c361baf29d3d77b8526c1f';
+const totalNumberPicturesOfPage = 40;
 const refs = {
   formEll: document.querySelector(".search-form"),
   inputEll: document.querySelector(".js_form_input"),
@@ -26,41 +27,53 @@ console.log(refs.inputEll);
 console.log(refs.btnSubmitEll);
 console.log(refs.containerGalleryEll);
 console.log(refs.buttonEll);
-   let page = 1;
-function fetchAPI() {
-  return fetch(`https://pixabay.com/api/?key=34821282-c80c361baf29d3d77b8526c1f&q=${refs.inputEll.value}&image_type=photo&orientation=horizontal&safesearch=true&per_page=${totalNumberPicturesOfPage}&page=${page}`)
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error(response.status)
-      }
-      return  response.json()
-    }
-    )
-     
-}
+let page = 1;
+const fetchAPI = () =>
+  axios.get(`${BASE_URL}&q=${refs.inputEll.value}&image_type=photo&orientation=horizontal&safesearch=true&per_page=${totalNumberPicturesOfPage}&page=${page}`)
+//===================2===============
+// const fetchAPI = () =>
+//   fetch(`${BASE_URL}&q=${refs.inputEll.value}&image_type=photo&orientation=horizontal&safesearch=true&per_page=${totalNumberPicturesOfPage}&page=${page}`)
+//     .then((response) => {
+//       if (!response.ok) {
+//         throw new Error(response.status)
+//       }
+//       return  response.json()
+//     })
+//================1=====================
+// function fetchAPI() {
+//   return fetch(`${BASE_URL}&q=${refs.inputEll.value}&image_type=photo&orientation=horizontal&safesearch=true&per_page=${totalNumberPicturesOfPage}&page=${page}`)
+//     .then((response) => {
+//       if (!response.ok) {
+//         throw new Error(response.status)
+//       }
+//       return  response.json()
+//     }
+//     ) 
+// }
 function handleLoadCard()
 {
-  fetchAPI().then((data) => {
-    console.log(data.hits);
-    console.log(data.totalHits);
-    if (data.totalHits > 1 && page === 1) {
-       Notify.success(`Hooray! We found ${data.totalHits} images.`);
+  fetchAPI().then((obg) => {
+    console.log(' data', obg);
+    console.log('data.hits----',obg.data.hits);
+    console.log(obg.data.totalHits);
+    if (obg.data.totalHits > 1 && page === 1) {
+       Notify.success(`Hooray! We found ${obg.data.totalHits} images.`);
     }
-    if (data.totalHits === 0 ) {
-      refs.buttonEll.classList.add("btn_hidden");
+    if (obg.data.totalHits === 0 ) {
+     refs.buttonEll.classList.add("btn_hidden");
     Notify.failure("Sorry, there are no images matching your search query. Please try again.");
       return console.log(' фото незнайдено');
 
     } else {
      
-      if (data.hits.length < totalNumberPicturesOfPage) {
+      if (obg.data.hits.length < totalNumberPicturesOfPage) {
         refs.buttonEll.classList.add("btn_hidden");
         Notify.info(`We're sorry, but you've reached the end of search results.`);
         console.log(' останні фото');
      }
       
     }      
-    return allCollection(data.hits) 
+    return allCollection(obg.data.hits) 
        
      })
     .then(() => { return page += 1 })
@@ -71,9 +84,15 @@ function handleLoadCard()
    event.preventDefault();
  
   refs.containerGalleryEll.innerHTML=""; 
-   console.log(refs.inputEll.value);
+   console.log('   input ---    ',refs.inputEll.value.trim());
    page = 1;
-   refs.buttonEll.classList.remove("btn_hidden");
+  
+   if (refs.inputEll.value.trim() === "") {
+      // refs.buttonEll.classList.add("btn_hidden");
+      Notify.failure("Sorry. Please try again.");
+     return
+   }
+  refs.buttonEll.classList.remove("btn_hidden");
    handleLoadCard()
 
 }
