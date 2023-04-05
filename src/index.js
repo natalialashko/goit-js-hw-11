@@ -1,5 +1,9 @@
 import axios from "axios";
 import Notiflix, { Notify } from 'notiflix';
+// Описаний в документації
+import SimpleLightbox from "simplelightbox";
+// Додатковий імпорт стилів
+import "simplelightbox/dist/simple-lightbox.min.css";
 
 //Your API key: 34821282-c80c361baf29d3d77b8526c1f
 // https://pixabay.com/api/
@@ -48,32 +52,34 @@ const fetchAPI = () =>
 //       }
 //       return  response.json()
 //     }
-//     ) 
+//     )
 // }
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++
 function handleLoadCard()
 {
-  fetchAPI().then((obg) => {
-    console.log(' data', obg);
-    console.log('data.hits----',obg.data.hits);
-    console.log(obg.data.totalHits);
-    if (obg.data.totalHits > 1 && page === 1) {
-       Notify.success(`Hooray! We found ${obg.data.totalHits} images.`);
+  fetchAPI().then(({ data }) => {
+    console.log(' data', data);
+    console.log('data.hits----',data.hits);
+    console.log(data.totalHits);
+    if (data.totalHits > 1 && page === 1) {
+       Notify.success(`Hooray! We found ${data.totalHits} images.`);
     }
-    if (obg.data.totalHits === 0 ) {
+    if (data.totalHits === 0 ) {
      refs.buttonEll.classList.add("btn_hidden");
     Notify.failure("Sorry, there are no images matching your search query. Please try again.");
       return console.log(' фото незнайдено');
 
     } else {
      
-      if (obg.data.hits.length < totalNumberPicturesOfPage) {
+      if (data.hits.length < totalNumberPicturesOfPage) {
         refs.buttonEll.classList.add("btn_hidden");
         Notify.info(`We're sorry, but you've reached the end of search results.`);
         console.log(' останні фото');
      }
       
     }      
-    return allCollection(obg.data.hits) 
+    return allCollection(data.hits) 
        
      })
     .then(() => { return page += 1 })
@@ -86,7 +92,7 @@ function handleLoadCard()
   refs.containerGalleryEll.innerHTML=""; 
    console.log('   input ---    ',refs.inputEll.value.trim());
    page = 1;
-  
+ 
    if (refs.inputEll.value.trim() === "") {
       // refs.buttonEll.classList.add("btn_hidden");
       Notify.failure("Sorry. Please try again.");
@@ -101,10 +107,10 @@ function inputBtn(event) {
    handleLoadCard()
 }
 
-function markup({ webformatURL, tags, likes, views, comments, downloads })
+function markup({ largeImageURL, webformatURL, tags, likes, views, comments, downloads })
 {
   const card = `
-  <div class="photo-card">
+  <a href="${largeImageURL}" class="photo-card" >
   <img src="${webformatURL}" alt="${tags}" loading="lazy" />
   <div class="info">
     <p class="info-item">
@@ -120,7 +126,7 @@ function markup({ webformatURL, tags, likes, views, comments, downloads })
       <b>Downloads:  ${downloads}</b>
     </p>
   </div>
-</div>
+</a>
 `
  refs.containerGalleryEll.insertAdjacentHTML("beforeend", card); 
 }
@@ -128,8 +134,20 @@ function markup({ webformatURL, tags, likes, views, comments, downloads })
 function allCollection(newCollection) {
   newCollection.forEach((element) => {
     markup(element);
+    //  lightbox.refresh();
   });
+}
+ 
+     function onClick(event) {
+    event.preventDefault();
+    if (event.target.nodeName !== 'IMG') {
+        return
+    }
+    
+  const lightbox = new SimpleLightbox('.gallery a');
+      lightbox.show() 
 }
 
 refs.formEll.addEventListener("submit", submitInfo);
 refs.buttonEll.addEventListener("click", inputBtn);
+refs.containerGalleryEll.addEventListener('click', onClick);
