@@ -134,8 +134,9 @@ function markup({ largeImageURL, webformatURL, tags, likes, views, comments, dow
 function allCollection(newCollection) {
   newCollection.forEach((element) => {
     markup(element);
-    //  lightbox.refresh();
+    
   });
+  lightbox.refresh();
 }
  
      function onClick(event) {
@@ -144,10 +145,10 @@ function allCollection(newCollection) {
         return
     }
     
-  const lightbox = new SimpleLightbox('.gallery a');
-      lightbox.show() 
 }
 
 refs.formEll.addEventListener("submit", submitInfo);
+ const lightbox = new SimpleLightbox('.gallery a');
+   
 refs.buttonEll.addEventListener("click", inputBtn);
 refs.containerGalleryEll.addEventListener('click', onClick);
